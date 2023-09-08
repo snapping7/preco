@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tabela de Combinações de Preços</title>
+</head>
+<body>
+    <label for="valorDesejado">Valor Desejado:</label>
+    <input type="number" id="valorDesejado" min="0" step="0.01">
+    <button onclick="calcularCombinacoes()">Calcular</button>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Combinação de Produtos</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaCombinacoes">
+            <!-- A tabela de combinações será preenchida dinamicamente aqui -->
+        </tbody>
+    </table>
+
+    <script>
+        const listaDeProdutos = {
+            "salgado": 8,
+            "laranja": 4.5,
+            "caju": 3.5,
+            "290": 4.1,
+            "600": 7.75,
+            "lata": 5.70,
+            "600_pet": 7.75,
+            "1l": 7,
+            "1l_pet": 9.30,
+            "220": 3.60,
+            "200": 3.10
+        };
+
+        function encontrarCombinacoes(valorDesejado, produtos, combinacaoAtual = [], resultados = []) {
+            const valorAtual = combinacaoAtual.reduce((total, produto) => total + produtos[produto], 0);
+
+            if (valorAtual === valorDesejado) {
+                resultados.push([...combinacaoAtual]);
+                return;
+            }
+
+            if (valorAtual > valorDesejado) {
+                return;
+            }
+
+            for (const produto in produtos) {
+                combinacaoAtual.push(produto);
+                encontrarCombinacoes(valorDesejado, produtos, combinacaoAtual, resultados);
+                combinacaoAtual.pop();
+            }
+        }
+
+        // Função para calcular as combinações com base no valor inserido pelo usuário
+        function calcularCombinacoes() {
+            const valorDesejado = parseFloat(document.getElementById("valorDesejado").value);
+            const resultados = [];
+            encontrarCombinacoes(valorDesejado, listaDeProdutos, [], resultados);
+            preencherTabelaCombinacoes(resultados);
+        }
+
+        // Função para preencher a tabela com as combinações encontradas
+        function preencherTabelaCombinacoes(resultados) {
+            const tabelaCombinacoes = document.getElementById("tabelaCombinacoes");
+            tabelaCombinacoes.innerHTML = ""; // Limpa a tabela antes de preenchê-la novamente
+
+            resultados.forEach((combinacao, index) => {
+                const combinacaoFormatada = [];
+                for (const produto in listaDeProdutos) {
+                    const quantidade = combinacao.filter(item => item === produto).length;
+                    if (quantidade > 0) {
+                        combinacaoFormatada.push(`${produto} (${quantidade}x)`);
+                    }
+                }
+
+                const valorDaCombinação = combinacao.reduce((total, produto) => total + listaDeProdutos[produto], 0);
+                const row = tabelaCombinacoes.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                cell1.innerHTML = combinacaoFormatada.join(", ");
+                cell2.innerHTML = `R$ ${valorDaCombinação.toFixed(2)}`;
+            });
+        }
+    </script>
+</body>
+</html>
